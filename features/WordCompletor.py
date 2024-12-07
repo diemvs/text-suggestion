@@ -1,4 +1,5 @@
 from typing import List
+from features import PrefixTree
 
 class WordCompletor:
     def __init__(self, corpus: List[str]):
