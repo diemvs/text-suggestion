@@ -63,26 +63,25 @@ text_seggestion = TextSuggestion(word_completor, ngram_model)
 # endregion
 
 class State(rx.State):
-    suggestions: list = []
     text: str = ""
     predicted: str = ""
-    display_text: str = ""
+    completed_word: str = ""
     
     def reset_state(self):
         self.text = ""
         self.predicted = ""
-        self.suggestions = []
     
     def on_suggestion_select(self, suggestion):
         print(f"State on_suggestion_select -> suggestion = {suggestion}")
         
         self.text = self.text.strip() + ' ' + suggestion + ' '
-
-        self.display_text = self.text
         
-        self.suggestions = []
         self.predicted = ''
           
+    def on_completed_word_select(self):
+        words = self.text.strip().split()
+        self.text = ' '.join(words[:-1] + [self.completed_word])
+        self.completed_word = ''
     
     def on_change(self, text):
         print(f"\nState: on_change -> text = {text}")
@@ -101,10 +100,12 @@ class State(rx.State):
         if completions:
             completed_word = completions[probs.index(max(probs))]
             print(f"State: on_change -> completed_word = {completed_word}")
-            self.display_text = ' '.join(words[:-1] + [completed_word])
+            # self.text = ' '.join(words[:-1] + [completed_word])
+            self.completed_word = completed_word
         else:
             print(f"State: on_change -> no completions")
-            self.display_text = self.text
+            # self.text = self.text
+            self.completed_word = ''
             
         predicted = text_seggestion.suggest_text(words, n_words=N_WORDS, n_texts=N_TEXTS)
         print(f"State: on_change -> predicted = {predicted}")
@@ -119,20 +120,40 @@ def index() -> rx.Component:
             rx.text_area(
                 placeholder="Write something…",
                 value=State.text,
-                on_change=State.on_change
+                on_change=State.on_change,
+                size="3"
             ),
-            rx.text("Suggestions:"),
             rx.cond(
-                State.predicted != '',
+                State.completed_word == '',
+                rx.text("Here will be word completions..."),
                 rx.button(
-                    State.predicted,
-                    on_click=lambda: State.on_suggestion_select(State.predicted)
+                    State.completed_word,
+                    on_click=State.on_completed_word_select,
+                    size="3",
+                    variant="soft",
+                    color_scheme="grass",
+                    disabled=State.completed_word == ''
                 ),
-                rx.text("No suggestions")
             ),
+            rx.text_area(
+                placeholder="Here will be predicted text…",
+                value=State.predicted,
+                disabled=True,
+                size="3"
+            ),
+            rx.button(
+                'Add prediction to text',
+                on_click=lambda: State.on_suggestion_select(State.predicted),
+                size="3",
+                variant="soft",
+                color_scheme="grass",
+                disabled=State.predicted == ''
+            ),
+            
             spacing="5",
             justify="center",
             min_height="85vh",
+            min_width="60wv"
         ),
     )
 
