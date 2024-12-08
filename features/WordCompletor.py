@@ -7,7 +7,6 @@ class WordCompletor:
         corpus: list – корпус текстов
         """
         self.word_count_dict = {}
-        
         self.words_count = 0
         
         for corpus_item in corpus:
@@ -19,7 +18,6 @@ class WordCompletor:
                     self.word_count_dict[word] = 1
 
         self.word_count_dict = {key: value / self.words_count for key, value in self.word_count_dict.items()}
-        
         self.prefix_tree = PrefixTree(self.word_count_dict.keys())
         
 

@@ -11,9 +11,14 @@ def apply_clear_function(
     drop_columns: List[str]
 ) -> pd.DataFrame:
     for c in drop_columns:
-        data = data.drop(c, axis=1)
+        data = data.drop(c, axis=1) 
         
-    return  data[data_column].apply(clear_func)
+    data[data_column] = data[data_column].apply(clear_func)
+        
+    return data
+
+def get_tokens(data: pd.DataFrame, data_column: str):
+    return data[data_column].dropna().apply(lambda x: x.lower().split()).tolist()
 
 def cache_data_frame(data: pd.DataFrame, file_name: str):
     data.to_csv(f'datasets/{file_name}')

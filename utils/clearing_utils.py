@@ -34,8 +34,15 @@ def clear_message_body(message: str) -> str:
     # Удаляем disclaimers (юридические уведомления, например текст после *****)
     disclaimer_pattern = r'\n\*+.*?This e-mail.*?(?:\n\*+|\Z)'
     body = re.sub(disclaimer_pattern, '', body, flags=re.DOTALL)
+    
+    # Удаляем числа
+    number_pattern = r'\b\d+\b'  # Находит числа (одну или более цифр)
+    body = re.sub(number_pattern, '', body)
 
     # Убираем дополнительные пробелы
     body = re.sub(r'\s+', ' ', body).strip()
+    
+    # Убираем все символы, которые не являются буквами
+    body = re.sub(r'[^\w\s]', '', body)
 
     return body
